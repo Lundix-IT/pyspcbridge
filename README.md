@@ -1,6 +1,6 @@
 # pyspcbridge
 ## Introduction
-Python library for interacting with the SPC Bridge REST/Websocket API. The libaray is especially designed for the SPC Bridge integration in Home Assistant (HA).
+Python library for interacting with the SPC Bridge REST/Websocket API. The library is especially designed for the SPC Bridge integration in Home Assistant (HA).
 
 ## Prerequisites
 - Vanderbilt SPC panel, firmware version >= 3.8.5
