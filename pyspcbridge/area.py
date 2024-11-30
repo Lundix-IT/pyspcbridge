@@ -175,4 +175,4 @@ class Area:
             return err
 
     async def async_get_arm_status(self, arm_mode) -> dict:
-        return await self._http_client.async_get_area_arm_status(arm_mode, self,_id)
+        return await self._http_client.async_get_area_arm_status(arm_mode, self._id)
