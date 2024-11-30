@@ -1,5 +1,7 @@
 import logging
+
 _LOGGER = logging.getLogger(__name__)
+
 
 class User:
     """Represents a SPC user."""
@@ -29,4 +31,3 @@ class User:
     @property
     def spc_password(self):
         return self._spc_password
-
