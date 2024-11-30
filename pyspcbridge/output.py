@@ -1,7 +1,8 @@
 import logging
 
-_LOGGER = logging.getLogger(__name__)
 from .lib.spc_error import SpcError
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class Output:
@@ -31,7 +32,7 @@ class Output:
     def change_values(self, values) -> list:
         changed_values = []
 
-        if values.get("state") != None:
+        if values.get("state") is not None:
             if values["state"] != self._values["state"]:
                 self._values["state"] = values["state"]
                 changed_values.append("state")

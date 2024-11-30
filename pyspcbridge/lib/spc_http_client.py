@@ -1,16 +1,18 @@
-""" SPC http client """
+"""SPC http client"""
 
 import asyncio
 import logging
-import httpx
+
 import async_timeout
-from .spc_error import SpcError
+import httpx
+
 from .exceptions import RequestError, raise_error
+from .spc_error import SpcError
 
 _LOGGER = logging.getLogger(__name__)
 
-class SpcHttpClient:
 
+class SpcHttpClient:
     def __init__(self, gw_ip_address, gw_port, credentials, http_client):
         self._gw_ip_address = gw_ip_address
         self._gw_port = gw_port
@@ -32,7 +34,11 @@ class SpcHttpClient:
                 )
 
             if response.status_code != 200 and response.status_code != 404:
-                _LOGGER.error( "Error getting/settings SPC data from/to %s, HTTP status %d", url, response.status_code)
+                _LOGGER.error(
+                    "Error getting/settings SPC data from/to %s, HTTP status %d",
+                    url,
+                    response.status_code,
+                )
                 raise_error(response.status_code)
 
             result = response.json()
@@ -46,7 +52,7 @@ class SpcHttpClient:
             _LOGGER.error(message)
             raise RequestError(message) from errc
 
-        except (httpx.RequestError) as err:
+        except httpx.RequestError as err:
             message = f"Error getting/setting SPC data from/to {url}."
             _LOGGER.error(message)
             raise RequestError(message) from err
@@ -57,9 +63,14 @@ class SpcHttpClient:
         """Get the SPC data for the resource. (HTTP GET)"""
         proto = "http"
         auth = None
-        if len(self._credentials["get_username"]) and len(self._credentials["get_password"]):
+        if len(self._credentials["get_username"]) and len(
+            self._credentials["get_password"]
+        ):
             proto = "https"
-            auth = httpx.DigestAuth(username=self._credentials["get_username"], password=self._credentials["get_password"])
+            auth = httpx.DigestAuth(
+                username=self._credentials["get_username"],
+                password=self._credentials["get_password"],
+            )
 
         if id != None:
             url = f"{proto}://{self._gw_ip_address}:{self._gw_port}/spc/{resource}/{id}"
@@ -77,13 +88,20 @@ class SpcHttpClient:
 
         return data
 
-    async def _async_put_data(self, resource, command, id = None, username = None, password = None):
+    async def _async_put_data(
+        self, resource, command, id=None, username=None, password=None
+    ):
         """Send a command to SPC (HTTP PUT)."""
         proto = "http"
         auth = None
-        if len(self._credentials["put_username"]) and len(self._credentials["put_password"]):
+        if len(self._credentials["put_username"]) and len(
+            self._credentials["put_password"]
+        ):
             proto = "https"
-            auth=httpx.DigestAuth(username=self._credentials["put_username"], password=self._credentials["put_password"])
+            auth = httpx.DigestAuth(
+                username=self._credentials["put_username"],
+                password=self._credentials["put_password"],
+            )
 
         if id != None:
             url = f"{proto}://{self._gw_ip_address}:{self._gw_port}/spc/{resource}/{id}/{command}"
@@ -106,7 +124,14 @@ class SpcHttpClient:
         return data
 
     def _validate_header(self, reply) -> int:
-        if (not reply or (reply.get("status", "") != "success" and reply.get("status", "") != "error") or not reply.get("data")):
+        if (
+            not reply
+            or (
+                reply.get("status", "") != "success"
+                and reply.get("status", "") != "error"
+            )
+            or not reply.get("data")
+        ):
             return 998
         if (err := int(reply["data"].get("code", -1))) > 0:
             return err
@@ -114,13 +139,15 @@ class SpcHttpClient:
             return 998
         return 0
 
-    async def async_get_users(self, id = None):
-        """ Get Users data """
+    async def async_get_users(self, id=None):
+        """Get Users data"""
+
         def _normalize(d):
-            return { 
+            return {
                 "id": int(d.get("user_id", 0)),
                 "name": d.get("name", ""),
             }
+
         data = await self._async_get_data("user", id)
         if data and data.get("status", "") == "success" and data.get("data"):
             users = data["data"].get("user_config")
@@ -131,9 +158,9 @@ class SpcHttpClient:
         return {}
 
     async def async_get_panel(self):
-        """ Get Panel data """
+        """Get Panel data"""
         data = await self._async_get_data("panel")
-        if data and data.get("status", "") == "success" and data.get("data"): 
+        if data and data.get("status", "") == "success" and data.get("data"):
             panel = data["data"].get("panel_summary")
             if panel:
                 return {
@@ -144,21 +171,23 @@ class SpcHttpClient:
                     "pincode_length": panel.get("pin_digits", 4),
                 }
             else:
-                return None;
+                return None
 
-    async def async_get_area_configs(self, id = None):
-        """ Get Area config """
+    async def async_get_area_configs(self, id=None):
+        """Get Area config"""
+
         def _normalize(a):
-            return { 
+            return {
                 "id": int(a.get("id", 0)),
                 "entrytime": int(a.get("entrytime", 0)),
                 "exittime": int(a.get("exittime", 0)),
             }
+
         if id != None:
             data = await self._async_get_data(f"area/{id}/config")
         else:
             data = await self._async_get_data(f"area/config")
-        if data and data.get("status", "") == "success" and data.get("data"): 
+        if data and data.get("status", "") == "success" and data.get("data"):
             areas = data["data"].get("area")
             if isinstance(areas, dict):
                 return [_normalize(a) for a in [areas]]
@@ -166,8 +195,9 @@ class SpcHttpClient:
                 return [_normalize(a) for a in areas]
         return {}
 
-    async def async_get_area_arm_status(self, arm_mode, id = None):
-        """ Get Area arm status """
+    async def async_get_area_arm_status(self, arm_mode, id=None):
+        """Get Area arm status"""
+
         def _normalize(a):
             reasons = []
             for x in range(100):
@@ -185,17 +215,21 @@ class SpcHttpClient:
                         reasons.append("undefined")
                 else:
                     break
-            return { 
+            return {
                 "area_id": int(a.get("area_id", 0)),
                 "reasons": reasons,
             }
+
         if id != None:
             data = await self._async_get_data(f"area/{id}/{arm_mode}_status")
         else:
             data = await self._async_get_data(f"area/{arm_mode}_status")
-        if (data and data.get("status", "") == "success" and 
-            data.get("data") and 
-            (d := data.get("data").get("reply_get_area_change_mode_status"))):
+        if (
+            data
+            and data.get("status", "") == "success"
+            and data.get("data")
+            and (d := data.get("data").get("reply_get_area_change_mode_status"))
+        ):
             areas = d.get("area_change_mode_status")
             if isinstance(areas, dict):
                 return [_normalize(a) for a in [areas]]
@@ -203,10 +237,11 @@ class SpcHttpClient:
                 return [_normalize(a) for a in areas]
         return {}
 
-    async def async_get_areas(self, id = None):
-        """ Get Area data """
+    async def async_get_areas(self, id=None):
+        """Get Area data"""
+
         def _normalize(a):
-            return { 
+            return {
                 "id": int(a.get("area_id", 0)),
                 "name": a.get("area_name", ""),
                 "mode": int(a.get("mode", 0)),
@@ -217,8 +252,9 @@ class SpcHttpClient:
                 "set_user": a.get("last_set_user_name", ""),
                 "unset_user": a.get("last_unset_user_name", ""),
             }
+
         data = await self._async_get_data("area", id)
-        if data and data.get("status", "") == "success" and data.get("data"): 
+        if data and data.get("status", "") == "success" and data.get("data"):
             areas = data["data"].get("area_status")
             if isinstance(areas, dict):
                 return [_normalize(a) for a in [areas]]
@@ -226,10 +262,11 @@ class SpcHttpClient:
                 return [_normalize(a) for a in areas]
         return {}
 
-    async def async_get_zones(self, id = None):
-        """ Get Zone data """
+    async def async_get_zones(self, id=None):
+        """Get Zone data"""
+
         def _normalize(z):
-            return { 
+            return {
                 "id": int(z.get("zone_id", 0)),
                 "name": z.get("zone_name", ""),
                 "type": int(z.get("type", 0)),
@@ -238,6 +275,7 @@ class SpcHttpClient:
                 "area_id": int(z.get("area_id", 0)),
                 "area_name": z.get("area_name", ""),
             }
+
         data = await self._async_get_data("zone", id)
         if data and data.get("status", "") == "success" and data.get("data"):
             zones = data["data"].get("zone_status")
@@ -247,14 +285,16 @@ class SpcHttpClient:
                 return [_normalize(z) for z in zones]
         return {}
 
-    async def async_get_outputs(self, id = None):
-        """ Get Output data """
+    async def async_get_outputs(self, id=None):
+        """Get Output data"""
+
         def _normalize(o):
-            return { 
+            return {
                 "id": int(o.get("mg_id", 0)),
                 "name": o.get("mg_name", ""),
                 "state": int(o.get("state", 0)),
             }
+
         data = await self._async_get_data("output", id)
         if data and data.get("status", "") == "success" and data.get("data"):
             outputs = data["data"].get("mg_status")
@@ -264,15 +304,17 @@ class SpcHttpClient:
                 return [_normalize(o) for o in outputs]
         return {}
 
-    async def async_get_doors(self, id = None):
-        """ Get Door data """
+    async def async_get_doors(self, id=None):
+        """Get Door data"""
+
         def _normalize(d):
-            return { 
+            return {
                 "id": int(d.get("door_id", 0)),
                 "name": d.get("zone_name", ""),
                 "status": int(d.get("status", 0)),
                 "mode": int(d.get("mode", 0)),
             }
+
         data = await self._async_get_data("door", id)
         if data and data.get("status", "") == "success" and data.get("data"):
             doors = data["data"].get("door_status")
@@ -282,24 +324,34 @@ class SpcHttpClient:
                 return [_normalize(d) for d in doors]
         return {}
 
-    async def async_command_area(self, command, id = None, username = None, password = None) -> dict:
-        """ Area commands """
-        try: 
+    async def async_command_area(
+        self, command, id=None, username=None, password=None
+    ) -> dict:
+        """Area commands"""
+        try:
             reply = await self._async_put_data("area", command, id, username, password)
             if (err := self._validate_header(reply)) > 0:
                 return SpcError(err).error
 
             _data = reply.get("data")
-            if _data.get("reply_area_change_mode") and (err := int(_data.get("reply_area_change_mode").get("result", -1))) > 0:
+            if (
+                _data.get("reply_area_change_mode")
+                and (err := int(_data.get("reply_area_change_mode").get("result", -1)))
+                > 0
+            ):
                 return SpcError(err).error
-            if _area_change_mode := _data.get("reply_area_change_mode").get("area_change_mode"):
+            if _area_change_mode := _data.get("reply_area_change_mode").get(
+                "area_change_mode"
+            ):
                 if isinstance(_area_change_mode, dict):
                     if (err := int(_area_change_mode.get("result", -1))) >= 0:
                         return SpcError(err).error
                 elif isinstance(_area_change_mode, list):
                     errors = {}
                     for a in _area_change_mode:
-                        if ((id := int(a.get("area_id", -1)) > 0) and (err := int(a.get("result", -1)) >= 0)):
+                        if (id := int(a.get("area_id", -1)) > 0) and (
+                            err := int(a.get("result", -1)) >= 0
+                        ):
                             errors[id] = SpcError(err).error
                         else:
                             return SpcError(998).error
@@ -309,69 +361,119 @@ class SpcHttpClient:
         except Exception as err:
             return SpcError(998).error
 
-    async def async_command_zone(self, command, id = None, username = None, password = None) -> dict:
-        """ Zone commands """
-        try: 
+    async def async_command_zone(
+        self, command, id=None, username=None, password=None
+    ) -> dict:
+        """Zone commands"""
+        try:
             reply = await self._async_put_data("zone", command, id, username, password)
             if (err := self._validate_header(reply)) > 0:
                 return SpcError(err).error
 
             _data = reply.get("data")
-            if _data.get("reply_zone_control") and (err := int(_data.get("reply_zone_control").get("result", -1))) > 0:
+            if (
+                _data.get("reply_zone_control")
+                and (err := int(_data.get("reply_zone_control").get("result", -1))) > 0
+            ):
                 return SpcError(err).error
-            if _data.get("reply_zone_control").get("zone_control") and (err := int(_data.get("reply_zone_control").get("zone_control").get("result", -1))) >= 0:
+            if (
+                _data.get("reply_zone_control").get("zone_control")
+                and (
+                    err := int(
+                        _data.get("reply_zone_control")
+                        .get("zone_control")
+                        .get("result", -1)
+                    )
+                )
+                >= 0
+            ):
                 return SpcError(err).error
             else:
                 return SpcError(998).error
         except Exception as err:
             return SpcError(998).error
 
-    async def async_command_output(self, command, id = None, username = None, password = None):
-        """ Output commands """
-        try: 
-            reply = await self._async_put_data("output", command, id, username, password)
+    async def async_command_output(
+        self, command, id=None, username=None, password=None
+    ):
+        """Output commands"""
+        try:
+            reply = await self._async_put_data(
+                "output", command, id, username, password
+            )
             if (err := self._validate_header(reply)) > 0:
                 return SpcError(err).error
 
             _data = reply.get("data")
-            if _data.get("reply_mg_control") and (err := int(_data.get("reply_mg_control").get("result", -1))) > 0:
+            if (
+                _data.get("reply_mg_control")
+                and (err := int(_data.get("reply_mg_control").get("result", -1))) > 0
+            ):
                 return SpcError(err).error
-            if _data.get("reply_mg_control").get("mg_control") and (err := int(_data.get("reply_mg_control").get("mg_control").get("result", -1))) >= 0:
+            if (
+                _data.get("reply_mg_control").get("mg_control")
+                and (
+                    err := int(
+                        _data.get("reply_mg_control")
+                        .get("mg_control")
+                        .get("result", -1)
+                    )
+                )
+                >= 0
+            ):
                 return SpcError(err).error
             else:
                 return SpcError(998).error
         except Exception as err:
             return SpcError(998).error
 
-    async def async_command_door(self, command, id = None, username = None, password = None):
-        """ Door commands """
-        try: 
+    async def async_command_door(self, command, id=None, username=None, password=None):
+        """Door commands"""
+        try:
             reply = await self._async_put_data("door", command, id, username, password)
             if (err := self._validate_header(reply)) > 0:
                 return SpcError(err).error
 
             _data = reply.get("data")
-            if _data.get("reply_door_control") and (err := int(_data.get("reply_door_control").get("result", -1))) > 0:
+            if (
+                _data.get("reply_door_control")
+                and (err := int(_data.get("reply_door_control").get("result", -1))) > 0
+            ):
                 return SpcError(err).error
-            if _data.get("reply_door_control").get("door_control_result") and (err := int(_data.get("reply_door_control").get("door_control_result").get("result", -1))) >= 0:
+            if (
+                _data.get("reply_door_control").get("door_control_result")
+                and (
+                    err := int(
+                        _data.get("reply_door_control")
+                        .get("door_control_result")
+                        .get("result", -1)
+                    )
+                )
+                >= 0
+            ):
                 return SpcError(err).error
             else:
                 return SpcError(998).error
         except Exception as err:
             return SpcError(998).error
 
-    async def async_command_clear_alerts(self, username = None, password = None):
-        """ Command - Clear All Alerts """
-        try: 
-            reply = await self._async_put_data("alert", "clear", username=username, password=password)
+    async def async_command_clear_alerts(self, username=None, password=None):
+        """Command - Clear All Alerts"""
+        try:
+            reply = await self._async_put_data(
+                "alert", "clear", username=username, password=password
+            )
             if (err := self._validate_header(reply)) > 0:
                 return SpcError(err).error
 
             _data = reply.get("data")
-            if _data.get("reply_clear_all_alerts") and (err := int(_data.get("reply_clear_all_alerts").get("result", -1))) >= 0:
+            if (
+                _data.get("reply_clear_all_alerts")
+                and (err := int(_data.get("reply_clear_all_alerts").get("result", -1)))
+                >= 0
+            ):
                 return SpcError(err).error
             else:
                 return SpcError(998).error
         except Exception as err:
             return SpcError(998).error
-

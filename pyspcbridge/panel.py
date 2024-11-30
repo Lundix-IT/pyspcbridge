@@ -2,7 +2,6 @@ import logging
 
 from .const import ArmMode
 from .lib.spc_error import SpcError
-from .lib.utils import _load_enum
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -59,7 +58,7 @@ class Panel:
     @property
     def a_name(self):
         for a in self._areas:
-            if a.a_name != None:
+            if a.a_name is not None:
                 return a.a_name
         return ""
 
@@ -73,7 +72,7 @@ class Panel:
     @property
     def b_name(self):
         for a in self._areas:
-            if a.b_name != None:
+            if a.b_name is not None:
                 return a.b_name
         return ""
 
@@ -107,10 +106,10 @@ class Panel:
 
     def change_values(self, values) -> list:
         changed_values = []
-        if values.get("event") != None:
+        if values.get("event") is not None:
             self._values["event"] = values["event"]
             changed_values.append("event")
-        if values.get("changed_by") != None:
+        if values.get("changed_by") is not None:
             self._values["changed_by"] = values["changed_by"]
             changed_values.append("changed_by")
         return changed_values
@@ -120,7 +119,7 @@ class Panel:
         _mode = None
         for a in self._areas:
             _area_mode = a.mode
-            if _mode == None:
+            if _mode is None:
                 _mode = _area_mode
             elif _area_mode.value != _mode.value:
                 _m = _mode
@@ -139,7 +138,7 @@ class Panel:
     def pending_exit(self):
         _state = False
         for a in self._areas:
-            if a.pending_exit == True:
+            if a.pending_exit is True:
                 _state = a.pending_exit
         return _state
 
@@ -156,7 +155,7 @@ class Panel:
         for a in self._areas:
             _area_alarm_status = a.alarm_status
             for k in _area_alarm_status:
-                if _area_alarm_status[k] == True:
+                if _area_alarm_status[k] is True:
                     _alarm_status[k] = True
 
         return _alarm_status

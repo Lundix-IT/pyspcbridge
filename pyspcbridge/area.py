@@ -93,25 +93,25 @@ class Area:
     def change_values(self, values) -> list:
         changed_values = []
 
-        if values.get("mode") != None:
+        if values.get("mode") is not None:
             new_mode = _load_enum(ArmMode, values["mode"])
             if new_mode != self._values["mode"]:
                 self._values["mode"] = new_mode
                 changed_values.append("mode")
 
-        if values.get("changed_by") != None:
+        if values.get("changed_by") is not None:
             self._values["changed_by"] = values["changed_by"]
             changed_values.append("changed_by")
 
-        if values.get("set_user") != None:
+        if values.get("set_user") is not None:
             self._values["set_user"] = values["set_user"]
             changed_values.append("set_user")
 
-        if values.get("unset_user") != None:
+        if values.get("unset_user") is not None:
             self._values["unset_user"] = values["unset_user"]
             changed_values.append("unset_user")
 
-        if values.get("pending_exit") != None:
+        if values.get("pending_exit") is not None:
             self._values["pending_exit"] = values["pending_exit"]
             changed_values.append("pending_exit")
 
@@ -130,9 +130,9 @@ class Area:
         for zone in self.zones:
             zone_alarm_status = zone.alarm_status
             for k in zone_alarm_status:
-                if zone_alarm_status[k] == True:
+                if zone_alarm_status[k] is True:
                     _alarm_status[k] = True
-                    if k == "intrusion" and _alarm_status[k] == True:
+                    if k == "intrusion" and _alarm_status[k] is True:
                         _alarm_status["verified"] = True
         return _alarm_status
 
