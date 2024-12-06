@@ -64,7 +64,7 @@ class Door:
 
         return changed_values
 
-    async def async_command(self, command, code) -> int:
+    async def async_command(self, command, code) -> dict:
         if code is None:
             return SpcError(54).error
 

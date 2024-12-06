@@ -115,7 +115,7 @@ class Zone:
     def isolated(self) -> bool:
         return self._values["status"] == ZoneStatus.ISOLATE
 
-    async def async_command(self, command, code) -> int:
+    async def async_command(self, command, code) -> dict:
         if code is None:
             return SpcError(54).error
 

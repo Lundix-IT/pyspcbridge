@@ -61,9 +61,10 @@ class AIOWSClient:
                     if msg.type == aiohttp.WSMsgType.TEXT:
                         ensure_future(self._async_callback(json.loads(msg.data)))
                         _LOGGER.debug("Websocket data: %s", msg.data)
-                    elif msg.type == aiohttp.WSMsgType.CLOSED:
-                        break
-                    elif msg.type == aiohttp.WSMsgType.ERROR:
+                    elif (
+                        msg.type == aiohttp.WSMsgType.CLOSED
+                        or msg.type == aiohttp.WSMsgType.ERROR
+                    ):
                         break
         except aiohttp.ClientConnectorError:
             if self.state != STATE_STOPPED:

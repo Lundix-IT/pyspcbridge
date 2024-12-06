@@ -1,4 +1,4 @@
-class SpcError():
+class SpcError:
     ERROR_MAP = {
         0: "OK",
         1: "OK (limited)",
@@ -65,19 +65,17 @@ class SpcError():
         140: "ERROR: HTTP – Compulsory Parameter Not Found",
         160: "ERROR: SAM – WD Output",
         998: "ERROR: Communication error",
-        999: "ERROR: Unknown error"
+        999: "ERROR: Unknown error",
     }
 
     def __init__(self, code: int) -> None:
         self._code = code
-        self._message = self.ERROR_MAP.get(code, "ERROR: Unknowm error")
+        self._message = self.ERROR_MAP.get(code, "ERROR: Unknown error")
 
-    @property 
+    @property
     def message(self) -> str:
         return self._message
 
-    @property 
+    @property
     def error(self) -> dict:
         return {"code": self._code, "message": self._message}
-
-

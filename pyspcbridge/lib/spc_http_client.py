@@ -1,9 +1,7 @@
 """SPC http client"""
 
-import asyncio
 import logging
 
-import async_timeout
 import httpx
 
 from .exceptions import RequestError, raise_error
@@ -42,6 +40,7 @@ class SpcHttpClient:
                 raise_error(response.status_code)
 
             result = response.json()
+
         except httpx.TimeoutException as errt:
             message = f"Timeout getting/setting SPC data from/to {url}."
             _LOGGER.error(message)
@@ -72,16 +71,16 @@ class SpcHttpClient:
                 password=self._credentials["get_password"],
             )
 
-        if id != None:
+        if id is not None:
             url = f"{proto}://{self._gw_ip_address}:{self._gw_port}/spc/{resource}/{id}"
         else:
             url = f"{proto}://{self._gw_ip_address}:{self._gw_port}/spc/{resource}"
+
         try:
             data = await self._async_request(self._http_client.get, auth, url)
             if not data:
                 _LOGGER.error("Unable to get data from SPC")
                 return None
-
         except Exception:
             _LOGGER.error("Unable to get data from SPC")
             raise
@@ -103,12 +102,12 @@ class SpcHttpClient:
                 password=self._credentials["put_password"],
             )
 
-        if id != None:
+        if id is not None:
             url = f"{proto}://{self._gw_ip_address}:{self._gw_port}/spc/{resource}/{id}/{command}"
         else:
             url = f"{proto}://{self._gw_ip_address}:{self._gw_port}/spc/{resource}/{command}"
 
-        if username != None and password != None:
+        if username and password:
             url = f"{url}?username={username}&password={password}"
 
         try:
@@ -116,7 +115,6 @@ class SpcHttpClient:
             if not data:
                 _LOGGER.error("Unable to send a command to SPC")
                 return None
-
         except Exception:
             _LOGGER.error("Unable to to send a command to SPC")
             raise
@@ -183,16 +181,18 @@ class SpcHttpClient:
                 "exittime": int(a.get("exittime", 0)),
             }
 
-        if id != None:
+        if id is not None:
             data = await self._async_get_data(f"area/{id}/config")
         else:
-            data = await self._async_get_data(f"area/config")
+            data = await self._async_get_data("area/config")
+
         if data and data.get("status", "") == "success" and data.get("data"):
             areas = data["data"].get("area")
             if isinstance(areas, dict):
                 return [_normalize(a) for a in [areas]]
             elif isinstance(areas, list):
                 return [_normalize(a) for a in areas]
+
         return {}
 
     async def async_get_area_arm_status(self, arm_mode, id=None):
@@ -201,7 +201,7 @@ class SpcHttpClient:
         def _normalize(a):
             reasons = []
             for x in range(100):
-                if (reason := a.get(f"reason_{x}")) != None:
+                if (reason := a.get(f"reason_{x}")) is not None:
                     r = int(reason)
                     if r > 100 and r < 999:
                         reasons.append(f"area_{r-100}")
@@ -220,10 +220,11 @@ class SpcHttpClient:
                 "reasons": reasons,
             }
 
-        if id != None:
+        if id is not None:
             data = await self._async_get_data(f"area/{id}/{arm_mode}_status")
         else:
             data = await self._async_get_data(f"area/{arm_mode}_status")
+
         if (
             data
             and data.get("status", "") == "success"
