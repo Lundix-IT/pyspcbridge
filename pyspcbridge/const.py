@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class ArmMode(Enum):
     UNSET = 0
     PART_SET_A = 1
@@ -54,6 +55,7 @@ class ZoneType(Enum):
     CO = 29
     ENTRY_EXIT_2 = 30
 
+
 class ZoneStatus(Enum):
     OK = 0
     INHIBIT = 1
@@ -64,8 +66,8 @@ class ZoneStatus(Enum):
     OK_NOT_RECENT = 6
     TROUBLE = 7
 
+
 class DoorMode(Enum):
     NORMAL = 0
     LOCKED = 1
     UNLOCKED = 2
-

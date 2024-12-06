@@ -1,24 +1,37 @@
 """Python wrapper for the Lundix SPC Bridge REST API."""
+
 import asyncio
 import logging
+
 import httpx
 
+from .area import Area
+from .const import ZoneInput
+from .door import Door
 from .lib.spc_http_client import SpcHttpClient
 from .lib.spc_ws_client import SpcWsClient
+from .output import Output
 from .panel import Panel
 from .user import User
-from .area import Area
 from .zone import Zone
-from .output import Output
-from .door import Door
-from .const import ZoneInput
 
 _LOGGER = logging.getLogger(__name__)
+
 
 class SpcBridge:
     """Alarm system representation."""
 
-    def __init__(self, gw_ip_address, gw_port, credentials, users_config, loop, session, http_client, async_callback):
+    def __init__(
+        self,
+        gw_ip_address,
+        gw_port,
+        credentials,
+        users_config,
+        loop,
+        session,
+        http_client,
+        async_callback,
+    ):
         """Initialize the client."""
         self._async_callback = async_callback
         self._panel = None
@@ -30,22 +43,22 @@ class SpcBridge:
         self._users_config = users_config
 
         self._http_client = SpcHttpClient(
-            gw_ip_address = gw_ip_address,
-            gw_port = gw_port,
-            credentials = credentials,
-            http_client = http_client
+            gw_ip_address=gw_ip_address,
+            gw_port=gw_port,
+            credentials=credentials,
+            http_client=http_client,
         )
 
         self._ws_client = SpcWsClient(
-            bridge = self,
-            gw_ip_address = gw_ip_address,
-            gw_port = gw_port,
-            credentials = credentials,
-            loop = loop,
-            session = session,
-            http_client = self._http_client
+            bridge=self,
+            gw_ip_address=gw_ip_address,
+            gw_port=gw_port,
+            credentials=credentials,
+            loop=loop,
+            session=session,
+            http_client=self._http_client,
         )
-        
+
     @property
     def info(self):
         """Retrieve basic panel info."""
@@ -60,7 +73,6 @@ class SpcBridge:
     def users(self):
         """Retrieve all available users."""
         return self._users
-
 
     @property
     def areas(self):
@@ -83,23 +95,29 @@ class SpcBridge:
         return self._doors
 
     def ws_start(self):
-        """ Start Websocket communication """
+        """Start Websocket communication"""
         self._ws_client.ws_start()
 
     def ws_stop(self):
-        """ Stop Websocket communication """
+        """Stop Websocket communication"""
         self._ws_client.ws_stop()
 
     def set_value(self, resource, id, values):
         if resource == "panel":
             if self._panel.change_values(values):
-                asyncio.create_task(self._async_callback("update", self._panel.id, [self._panel]))
+                asyncio.create_task(
+                    self._async_callback("update", self._panel.id, [self._panel])
+                )
 
         if resource == "area":
             area = self._areas[id]
             if area:
                 if area.change_values(values):
-                     asyncio.create_task(self._async_callback("update", self._panel.id, [area, self._panel]))
+                    asyncio.create_task(
+                        self._async_callback(
+                            "update", self._panel.id, [area, self._panel]
+                        )
+                    )
 
         if resource == "zone":
             zone = self._zones[id]
@@ -107,22 +125,32 @@ class SpcBridge:
                 changed_values = zone.change_values(values)
                 if "input" in changed_values and "status" not in changed_values:
                     # Only zone is needed to update
-                    asyncio.create_task(self._async_callback("update", self._panel.id, [zone]))
+                    asyncio.create_task(
+                        self._async_callback("update", self._panel.id, [zone])
+                    )
                 elif changed_values:
                     # Update zone, area of zone and panel
-                    asyncio.create_task(self._async_callback("update", self._panel.id, [zone, zone._area, self._panel]))
+                    asyncio.create_task(
+                        self._async_callback(
+                            "update", self._panel.id, [zone, zone._area, self._panel]
+                        )
+                    )
 
         if resource == "output":
             output = self._outputs[id]
             if output:
                 if output.change_values(values):
-                     asyncio.create_task(self._async_callback("update", self._panel.id, [output]))
+                    asyncio.create_task(
+                        self._async_callback("update", self._panel.id, [output])
+                    )
 
         if resource == "door":
             door = self._doors[id]
             if door:
                 if door.change_values(values):
-                     asyncio.create_task(self._async_callback("update", self._panel.id, [door]))
+                    asyncio.create_task(
+                        self._async_callback("update", self._panel.id, [door])
+                    )
 
     def get_user_credentials(self, code):
         """Parse a user code and return user's name and password"""
@@ -134,7 +162,7 @@ class SpcBridge:
             spc_len = self._panel.pincode_length
             code_len = len(code)
             if code_len > spc_len:
-                userid = code[:(code_len - spc_len)]
+                userid = code[: (code_len - spc_len)]
                 if u := self._users.get(int(userid)):
                     return u.name, code[-spc_len:]
         return None, None
@@ -156,8 +184,8 @@ class SpcBridge:
                 a["exittime"] = 0
                 a["entrytime"] = 0
                 if (id := a.get("id")) != None:
-                    config = await self._http_client.async_get_area_configs(id = id)
-                    if (config and list(config)):
+                    config = await self._http_client.async_get_area_configs(id=id)
+                    if config and list(config):
                         a["exittime"] = config[0].get("exittime", 0)
                         a["entrytime"] = config[0].get("entrytime", 0)
 
@@ -171,7 +199,11 @@ class SpcBridge:
         """ Create class objects """
         for a in areas_data:
             area = Area(self, a)
-            area_zones = [Zone(self, area, z) for z in zones_data if z.get("area_id") == a.get("id")]
+            area_zones = [
+                Zone(self, area, z)
+                for z in zones_data
+                if z.get("area_id") == a.get("id")
+            ]
             area.zones = area_zones
             self._areas[area.id] = area
             self._zones.update({z.id: z for z in area_zones})
@@ -180,7 +212,7 @@ class SpcBridge:
 
         for u in users_data:
             user = User(u, self._users_config)
-            self._users[user.id] = user 
+            self._users[user.id] = user
 
         for o in outputs_data:
             output = Output(self, o)

@@ -1,8 +1,10 @@
 import logging
+
 _LOGGER = logging.getLogger(__name__)
-from .lib.utils import _load_enum
-from .lib.spc_error import SpcError
 from .const import DoorMode
+from .lib.spc_error import SpcError
+from .lib.utils import _load_enum
+
 
 class Door:
     """Represents a SPC door lock."""
@@ -71,4 +73,6 @@ class Door:
         if username is None or password is None:
             return SpcError(54).error
 
-        return await self._http_client.async_command_door(command, self._id, username, password)
+        return await self._http_client.async_command_door(
+            command, self._id, username, password
+        )

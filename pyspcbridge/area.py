@@ -1,13 +1,15 @@
 import logging
 
 from .const import ArmMode
-from .lib.utils import _load_enum
 from .lib.spc_error import SpcError
+from .lib.utils import _load_enum
 
 _LOGGER = logging.getLogger(__name__)
 
+
 class Area:
     """Represents a SPC area."""
+
     def __init__(self, bridge, area_data):
         self._bridge = bridge
         self._id = area_data.get("id")
@@ -165,9 +167,13 @@ class Area:
             return SpcError(54).error
 
         if command == "clear_alerts":
-            return await self._http_client.async_command_clear_alerts(username, password)
+            return await self._http_client.async_command_clear_alerts(
+                username, password
+            )
         else:
-            err = await self._http_client.async_command_area(command, self._id, username, password)
+            err = await self._http_client.async_command_area(
+                command, self._id, username, password
+            )
             if command == "set_delayed" and err["code"] == 0:
                 self._bridge.set_value("area", self._id, {"pending_exit": True})
             else:

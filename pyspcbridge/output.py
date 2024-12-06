@@ -1,6 +1,8 @@
 import logging
+
 _LOGGER = logging.getLogger(__name__)
 from .lib.spc_error import SpcError
+
 
 class Output:
     """Represents a SPC output/mapping gate."""
@@ -24,7 +26,7 @@ class Output:
 
     @property
     def state(self) -> bool:
-        return self._values["state"] 
+        return self._values["state"]
 
     def change_values(self, values) -> list:
         changed_values = []
@@ -36,7 +38,6 @@ class Output:
 
         return changed_values
 
-
     async def async_command(self, command, code) -> int:
         if code is None:
             return SpcError(54).error
@@ -47,4 +48,6 @@ class Output:
         if username is None or password is None:
             return SpcError(54).error
 
-        return await self._http_client.async_command_output(command, self._id, username, password)
+        return await self._http_client.async_command_output(
+            command, self._id, username, password
+        )
