@@ -1,9 +1,6 @@
-SOURCE=	pyspcbridge
-
-
 lint:
-	ruff check $(SOURCE)
+	poetry run ruff check
 
 reformat:
-	ruff check --select I --fix $(SOURCE)
-	ruff format $(SOURCE)
+	poetry run ruff check --select I --fix
+	poetry run ruff format
