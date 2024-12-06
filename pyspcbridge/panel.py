@@ -1,23 +1,23 @@
 import logging
 
 from .const import ArmMode
-from .lib.utils import _load_enum
 from .lib.spc_error import SpcError
+from .lib.utils import _load_enum
 
 _LOGGER = logging.getLogger(__name__)
+
 
 class Panel:
     """Represents a SPC panel."""
 
     def __init__(self, bridge, panel_data, areas):
-
         self._bridge = bridge
         self._id = panel_data.get("serial")
         self._type = panel_data.get("type")
         self._model = panel_data.get("model")
         self._serial = panel_data.get("serial")
         self._firmware = panel_data.get("firmware")
-        self._pincode_length = int(panel_data.get("pincode_length",0))
+        self._pincode_length = int(panel_data.get("pincode_length", 0))
         self._http_client = bridge._http_client
         self._values = {
             "event": "",
@@ -104,7 +104,7 @@ class Panel:
     @property
     def values(self):
         return self._values
- 
+
     def change_values(self, values) -> list:
         changed_values = []
         if values.get("event") != None:
@@ -120,7 +120,7 @@ class Panel:
         _mode = None
         for a in self._areas:
             _area_mode = a.mode
-            if  _mode == None:
+            if _mode == None:
                 _mode = _area_mode
             elif _area_mode.value != _mode.value:
                 _m = _mode
@@ -190,9 +190,13 @@ class Panel:
                 return SpcError(54).error
 
         if command == "clear_alerts":
-            return await self._http_client.async_command_clear_alerts(username, password)
+            return await self._http_client.async_command_clear_alerts(
+                username, password
+            )
         else:
-            err = await self._http_client.async_command_area(command, None, username, password)
+            err = await self._http_client.async_command_area(
+                command, None, username, password
+            )
             if command == "set_delayed":
                 if isinstance(err, dict) and err.get("code", 0) > 0:
                     return err

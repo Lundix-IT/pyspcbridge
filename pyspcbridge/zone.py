@@ -1,10 +1,11 @@
 import logging
 
 from .const import ZoneInput, ZoneStatus, ZoneType
-from .lib.utils import _load_enum
 from .lib.spc_error import SpcError
+from .lib.utils import _load_enum
 
 _LOGGER = logging.getLogger(__name__)
+
 
 class Zone:
     """Represents a SPC zone."""
@@ -73,8 +74,12 @@ class Zone:
         if zone_status == ZoneStatus.TAMPER:
             _alarm_status["tamper"] = True
         elif zone_status == ZoneStatus.ALARM:
-            if (zone_type == ZoneType.ALARM or zone_type == ZoneType.ENTRY_EXIT or 
-                zone_type == ZoneType.GLASSBREAK or zone_type == ZoneType.ENTRY_EXIT_2):
+            if (
+                zone_type == ZoneType.ALARM
+                or zone_type == ZoneType.ENTRY_EXIT
+                or zone_type == ZoneType.GLASSBREAK
+                or zone_type == ZoneType.ENTRY_EXIT_2
+            ):
                 _alarm_status["intrusion"] = True
             elif zone_type == ZoneType.FIRE:
                 _alarm_status["fire"] = True
@@ -82,7 +87,7 @@ class Zone:
                 _alarm_status["tamper"] = True
 
         if zone_input != ZoneInput.CLOSED and zone_input != ZoneInput.OPEN:
-           _alarm_status["problem"] = True
+            _alarm_status["problem"] = True
 
         return _alarm_status
 
@@ -120,5 +125,6 @@ class Zone:
         if username is None or password is None:
             return SpcError(54).error
 
-        return await self._http_client.async_command_zone(command, self._id, username, password)
-
+        return await self._http_client.async_command_zone(
+            command, self._id, username, password
+        )
