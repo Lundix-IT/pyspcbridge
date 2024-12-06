@@ -37,13 +37,13 @@ class Zone:
     def change_values(self, values) -> list:
         changed_values = []
 
-        if values.get("input") != None:
+        if values.get("input") is not None:
             new_input = _load_enum(ZoneInput, values["input"])
             if new_input != self._values["input"]:
                 self._values["input"] = new_input
                 changed_values.append("input")
 
-        if values.get("status") != None:
+        if values.get("status") is not None:
             new_status = _load_enum(ZoneStatus, values["status"])
             if new_status != self._values["status"]:
                 self._values["status"] = new_status

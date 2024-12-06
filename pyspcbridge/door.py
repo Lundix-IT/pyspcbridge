@@ -1,9 +1,10 @@
 import logging
 
-_LOGGER = logging.getLogger(__name__)
 from .const import DoorMode
 from .lib.spc_error import SpcError
 from .lib.utils import _load_enum
+
+_LOGGER = logging.getLogger(__name__)
 
 
 class Door:

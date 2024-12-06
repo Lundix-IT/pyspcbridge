@@ -3,8 +3,6 @@
 import asyncio
 import logging
 
-import httpx
-
 from .area import Area
 from .const import ZoneInput
 from .door import Door
@@ -16,6 +14,8 @@ from .user import User
 from .zone import Zone
 
 _LOGGER = logging.getLogger(__name__)
+
+__all__ = ["Area", "Door", "Output", "Panel", "User", "Zone", "ZoneInput"]
 
 
 class SpcBridge:
@@ -183,7 +183,7 @@ class SpcBridge:
             for a in areas_data:
                 a["exittime"] = 0
                 a["entrytime"] = 0
-                if (id := a.get("id")) != None:
+                if (id := a.get("id")) is not None:
                     config = await self._http_client.async_get_area_configs(id=id)
                     if config and list(config):
                         a["exittime"] = config[0].get("exittime", 0)
@@ -250,7 +250,7 @@ class SpcBridge:
             }
 
             self.ws_start()
-            for x in range(10):
+            for _ in range(10):
                 await asyncio.sleep(1)
                 if self._ws_client.ws_state() == "running":
                     self.ws_stop()
@@ -258,7 +258,7 @@ class SpcBridge:
 
             self.ws_stop()
             return None
-        except Exception as err:
+        except Exception:
             self.ws_stop()
             return None
 
@@ -268,11 +268,11 @@ class SpcBridge:
                 return await self._http_client.async_command_clear_alerts()
             else:
                 return await self._http_client.async_command_area(command, id)
-        except Exception as err:
+        except Exception:
             raise
 
     async def async_get_arm_status(self, arm_mode, id=None) -> dict:
         try:
             return await self._http_client.async_get_area_arm_status(arm_mode, id)
-        except Exception as err:
+        except Exception:
             raise
