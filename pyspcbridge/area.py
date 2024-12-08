@@ -1,8 +1,8 @@
 import logging
 
 from .const import ArmMode
-from .lib.spc_error import SpcError
-from .lib.utils import _load_enum
+from .spc_error import SpcError
+from .utils import _load_enum
 
 _LOGGER = logging.getLogger(__name__)
 

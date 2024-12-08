@@ -1,6 +1,6 @@
 import logging
 
-from .lib.spc_error import SpcError
+from .spc_error import SpcError
 
 _LOGGER = logging.getLogger(__name__)
 

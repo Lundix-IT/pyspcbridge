@@ -6,10 +6,10 @@ import logging
 from .area import Area
 from .const import ZoneInput
 from .door import Door
-from .lib.spc_http_client import SpcHttpClient
-from .lib.spc_ws_client import SpcWsClient
 from .output import Output
 from .panel import Panel
+from .spc_http_client import SpcHttpClient
+from .spc_ws_client import SpcWsClient
 from .user import User
 from .zone import Zone
 
