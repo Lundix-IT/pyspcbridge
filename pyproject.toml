@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyspcbridge"
-version = "0.6.0"
+version = "0.6.1"
 description = "Python library for communicating with acre/Vanderbilt SPC alarm system via Lundix's SPC Bridge Generic (Lite)"
 authors = ["Lundix IT <info@lundix.se>"]
 license = "MIT"
