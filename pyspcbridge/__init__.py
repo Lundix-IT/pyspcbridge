@@ -173,10 +173,15 @@ class SpcBridge:
         _LOGGER.debug("Load SPC configuration")
         try:
             panel_data = await self._http_client.async_get_panel()
+            await asyncio.sleep(0.1)
             users_data = await self._http_client.async_get_users()
+            await asyncio.sleep(0.1)
             areas_data = await self._http_client.async_get_areas()
+            await asyncio.sleep(0.1)
             zones_data = await self._http_client.async_get_zones()
+            await asyncio.sleep(0.1)
             outputs_data = await self._http_client.async_get_outputs()
+            await asyncio.sleep(0.1)
             doors_data = await self._http_client.async_get_doors()
 
             # Get exit and entry times for each area
@@ -184,6 +189,7 @@ class SpcBridge:
                 a["exittime"] = 0
                 a["entrytime"] = 0
                 if (id := a.get("id")) is not None:
+                    await asyncio.sleep(0.1)
                     config = await self._http_client.async_get_area_configs(id=id)
                     if config and list(config):
                         a["exittime"] = config[0].get("exittime", 0)
@@ -234,11 +240,17 @@ class SpcBridge:
         """Test that communication parameters are valid"""
         try:
             panel_data = await self._http_client.async_get_panel()
+            await asyncio.sleep(0.1)
             users_data = await self._http_client.async_get_users()
+            await asyncio.sleep(0.1)
             areas_data = await self._http_client.async_get_areas()
+            await asyncio.sleep(0.1)
             zones_data = await self._http_client.async_get_zones()
+            await asyncio.sleep(0.1)
             outputs_data = await self._http_client.async_get_outputs()
+            await asyncio.sleep(0.1)
             doors_data = await self._http_client.async_get_doors()
+            await asyncio.sleep(0.1)
 
             spc_data = {
                 "panel": panel_data,
