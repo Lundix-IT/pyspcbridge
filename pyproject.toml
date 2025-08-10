@@ -1,23 +1,32 @@
-[tool.poetry]
+[project]
 name = "pyspcbridge"
-version = "0.6.2"
+dynamic = ["version"]
 description = "Python library for communicating with acre/Vanderbilt SPC alarm system via Lundix's SPC Bridge Generic (Lite)"
-authors = ["Lundix IT <info@lundix.se>"]
-license = "MIT"
+authors = [{name="Lundix IT", email = "info@lundix.se"}]
 readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "httpx>=0.27.0",
+    "aiohttp>=3.10.8"
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-httpx = ">=0.27.0"
-aiohttp = ">=3.10.8"
-
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.8.3"
-pytest = "^8.3.4"
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+    "pytest-ruff>=0.4.1",
+    "ruff>=0.8.3",
+]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling", "uv-dynamic-versioning"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.uv-dynamic-versioning]
+pattern = '(?P<base>\d+\.\d+\.\d+)'
 
 [tool.ruff]
 line-length = 88
