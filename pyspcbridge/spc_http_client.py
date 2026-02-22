@@ -271,7 +271,7 @@ class SpcHttpClient:
                 "id": int(z.get("zone_id", 0)),
                 "name": z.get("zone_name", ""),
                 "type": int(z.get("type", 0)),
-                "input": int(z.get("input", 0)),
+                "input": int(z.get("logic_input", 0)),
                 "status": int(z.get("status", 0)),
                 "area_id": int(z.get("area_id", 0)),
                 "area_name": z.get("area_name", ""),
