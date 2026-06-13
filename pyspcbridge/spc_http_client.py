@@ -204,9 +204,9 @@ class SpcHttpClient:
                 if (reason := a.get(f"reason_{x}")) is not None:
                     r = int(reason)
                     if r > 100 and r < 999:
-                        reasons.append(f"area_{r-100}")
+                        reasons.append(f"area_{r - 100}")
                     elif r > 1000 and r < 1999:
-                        reasons.append(f"zone_{r-1000}")
+                        reasons.append(f"zone_{r - 1000}")
                     elif r == 10006:
                         reasons.append("engineer_on_site")
                     elif r == 10007:
