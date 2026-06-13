@@ -1,6 +1,6 @@
 lint:
-	poetry run ruff check
+	uv run ruff check
 
 reformat:
-	poetry run ruff check --select I --fix
-	poetry run ruff format
+	uv run ruff check --select I --fix
+	uv run ruff format

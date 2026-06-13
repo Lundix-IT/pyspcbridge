@@ -38,7 +38,7 @@ class SpcWsClient:
             self._credentials["ws_password"]
         ):
             proto = "wss"
-            params = f"?username={self._credentials["ws_username"]}&password={self._credentials["ws_password"]}&flexc_poll_events=1"
+            params = f"?username={self._credentials['ws_username']}&password={self._credentials['ws_password']}&flexc_poll_events=1"
 
         url = f"{proto}://{self._gw_ip_address}:{self._gw_port}/ws/spc{params}"
         self._websocket = AIOWSClient(
